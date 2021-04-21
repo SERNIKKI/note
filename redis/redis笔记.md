@@ -23,7 +23,27 @@
 ## 五大数据类型
 
 ### String(字符串类型)
+>可以设置字符串和数字
 
+| 命令 | 含义 |
+| :--- | :--- |
+|`GET`|获取一个值。`GET key`|
+|`MGET`|获取多个值。`GET key1 key2 ...`|
+|`SET`|新增、修改一个值。`SET key value`|
+|`MSET`|设置多个值。`MSET key1 value1 key2 value2 ...`|
+|`GETSET`|设置一个值，然后返回之前的值 `GETSET key value`|
+|`GETRANGE`|根据范围获取值。<br/>比如一个value是 `hello`<br/>正数下标从0开始递增，负数下标在结尾处从-1开始向前递减<br/>`GETRANGE key 0 3` --> hell<br/>`GETRANGE key -5 -3` --> hel<br/>`GETRANGE key 0 -1` --> hello|
+|`SETEX key seconds value`|设置一个key，并规定它的过期时间，单位为**秒**|
+|`PSETEX key milliseconds value`|设置一个key，并规定它的过期时间，单位为**毫秒**|
+|`SETNX`|只有key不存在的时候设置value（新增一个）|
+|`MSETNX`|同时设置一个或多个key-value对，当且仅当所有的key都不存在才会成功。具有**原子性**|
+|`APPEND key value`|追加一个value值到key末尾|
+|`STRLEN key`|获取key的value值长度|
+|`INCR key`|将key中的数字值增加1|
+|`INCRBY key increment`|将key所储存的值增加给定的数量|
+|`INCRBYFLOAT key increment`|增加一定的浮点数|
+|`DECR key`|将key存储的数字减一|
+|`DECRBY key decrement`|减去给定的数值|
 
 ### List(列表类型)
 
