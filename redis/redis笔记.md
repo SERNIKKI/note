@@ -51,7 +51,7 @@
 | 命令 | 含义 |
 | :--- | :--- |
 |`LPUSH key value[value ...]`|将一个或多个value值插入到key的表头，**插入的时候是在表头插入，相当于入栈**<br/>如果key不存在，则会创建一个空列表并执行`LPUSH`操作<br/>如果key存在但不是列表的时候，会返回一个错误|
-|`RPUSH key value[value ...]`|将一个或多个value插入到key的表尾。<br/>如果key不存在，则创建以key命名的列表，并执行RPUSH操作|
+|`RPUSH key value[value ...]`|将一个或多个value插入到key的表尾。<br/>如果key不存在，则创建以key命名的列表，并执行`RPUSH`操作|
 |`LPUSHX key value`|将值value插入到列表key的表头，**当且仅当key存在并且是一个列表**|
 |`RPUSHX key value`|将值value插入到列表key的表尾，**当且仅当key存在并且是一个列表**|
 |`LSET key index value`|通过指定**下标**设置值，该下表必须**存在**。相当于**更新**操作|
