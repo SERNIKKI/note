@@ -68,11 +68,32 @@
 |`LRANGE key start stop`|查看指定范围的value，可以用于**分页**|
 |`LTRIM key start stop`|对一个列表进行**修剪(trim)**，让列表只保留指定区间内的元素，不在指定区间之内的元素都将被删除|
 
-
-
-
 ### Set(集合类型)
+>Set是String类型的无序集合。集合成员是**唯一**的，不能重复。
 
+| 命令 | 含义 |
+| :--- | :--- |
+|`SADD key member[member ...]`|将一个或多个member元素加入到集合key中，已经存在于集合的元素会被忽略;<br/>加入key不存在，则创建一个只包含member元素成员的集合|
+|`SCARD key`|返回集合key的基数(集合中元素的数量)|
+|`SISMEMBER key member`|判断member元素是否为集合key的成员。返回1表示存在，0表示不存在|
+|`SMEMBERS key`|返回集合key中的所有成员。不存在的key视为空集合|
+|`SMOVE source destination member`|将member元素从source集合移动到destination集合。**`SMOVEE`是原子性操作**<br/>如果source集合不存在或不包含指定的member元素，则`SMOVE`命令不执行任何操作，仅返回0。否则，member元素从source集合中被移除，并添加到destination集合中。<br/>当destination集合包含member元素时，`SMOVE`命令只是简单地将source集合中的member元素**删除**。<br/>当source或destination不是集合类型的时候，返回一个错误。|
+|`SPOP key`|将集合中一个随机的元素移除并返回|
+|`SRANDMEMBER key[count]`|如果执行时只有key参数，那么返回集合中一个随机的元素<br/>从Redis2.6版本开始。`SRANDMEMBER`命令接受可选的count参数<br/>count为正数且小于集合基数:命令返回一个包含count个元素的数组，数组中的元素各不相同<br/>count为正数且大于等于集合基数:返回整个集合<br/>count为负数:命令返回一个数组，数组中的元素可能会重复出现多次，数组长度为count的绝对值<br/>该操作和`SPOP`命令相似，但是`SRANDMEMBER`**仅仅返回随机的元素而不对集合进行任何改动**|
+|`SREM key member[member ...]`|移除集合key中一个或多个member元素，不存在的member元素会被忽略<br/>当key不是集合类型的时候，返回一个错误|
+|`SDIFF key[key ...]`|返回一个集合的全部成员，该集合是所有给定集合之间的**差集**|
+|`SDIFFSTORE destination key[key ...]`|这个命令的作用和`SDIFF`类似，但它将结果保存在destination集合，而不是简单的返回结果集。<br/>如果destination集合已经存在，则将其**覆盖**。<br/>destination可以是**key本身**，若destination不存在，则新建一个|
+|`SINTER key[key ...]`|返回一个集合的全部成员，该集合是所有给定集合的**交集**。<br/>不存在的key被视为**空集**。<br/>当给定的集合中有一个空集的时候，结果也为**空集**|
+|`SINTERSTORE destination key[key ...]`|这个命令的作用和`SINTER`类似，但它将结果保存在destination集合，而不是简单的返回结果集。<br/>如果destination集合已经存在，则将其**覆盖**。<br/>destination可以是**key本身**，若destination不存在，则新建一个|
+|`SUNION key[key ...]`|返回一个集合的全部成员，该集合是所有给定集合的**并集**。<br/>不存在的key被视为空集|
+|`SUNIONSTORE destination key[key ...]`|这个命令的作用和`SUNION`类似，但它将结果保存在destination集合，而不是简单的返回结果集。<br/>如果destination集合已经存在，则将其**覆盖**。<br/>destination可以是**key本身**，若destination不存在，则新建一个|
+
+>作用
+* 共同关注
+* 共同爱好
+* 二度好友
+* 推荐好友([六度分隔理论](https://baike.baidu.com/item/%E5%85%AD%E5%BA%A6%E5%88%86%E9%9A%94%E7%90%86%E8%AE%BA/1086996?fr=aladdin))
+* ... ...
 ### Hash(哈希类型)
 
 ### Zset(有序集合类型)
