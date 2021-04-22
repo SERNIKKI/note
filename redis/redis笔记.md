@@ -95,5 +95,20 @@
 * 推荐好友([六度分隔理论](https://baike.baidu.com/item/%E5%85%AD%E5%BA%A6%E5%88%86%E9%9A%94%E7%90%86%E8%AE%BA/1086996?fr=aladdin))
 * ......
 ### Hash(哈希类型)
+>hash可以存储对象，字典等。hash里面是一个string类型的key-value映射集合，每一个都叫做**域**
+
+| 命令 | 含义 |
+| :--- | :--- |
+|`HSET key field value`|将哈希表key中的域field的值设为value。<br/>如果key不存在，则创建一个新的hash表并进行`HSET`操作。<br/>如果域field已经存在于hash表中，则旧值将会被覆盖|
+|`HMSET key field value [field value ...]`|同时将多个field-value(域-值)对设置到哈希表key中。<br/>**此命令会覆盖旧的field域**|
+|`HGET key field`|返回哈希表key中给定域field的值|
+|`HMGET key field[field ...]`|返回哈希表中，一个或多个给定域的值。<br/>如果给定的域不存在于哈希表，则返回一个nil值。<br/>不存在的key被当作空哈希表处理，返回为nil|
+|`HGETALL key`|返回哈希表key中所有的域和值。**返回的长度为哈希表大小的2倍**|
+|`HEXISTS key field`|查看哈希表中，给定域field是否存在。<br/>若存在则返回1，否则返回0|
+|`HDEL key field[field ...]`|删除一个或多个域|
+|`HKEYS key`|返回哈希表key中所有的域|
+|`HLEN key`|返回哈希表key中域的数量|
+|`HINCRBY key field increment`|为哈希表key中的域field的值加上增量increment。<br/>增量可以为**负数**。<br/>如果key不存在，则创建一个新的哈希表key并执行`HINCRBY`命令。<br/>如果域field不存在，那么在执行命令前，域的值被初始化为0|
+|`HINCRBYFLOAT key field increment`|为哈希表 key 中的域 field 加上浮点数增量 increment 。|
 
 ### Zset(有序集合类型)
