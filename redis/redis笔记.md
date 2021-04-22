@@ -112,3 +112,26 @@
 |`HINCRBYFLOAT key field increment`|为哈希表 key 中的域 field 加上浮点数增量 increment 。|
 
 ### Zset(有序集合类型)
+>Redis有序集合和集合一样也是string类型元素的集合，且不允许重复的成员。<br/>不同的是每个元素都会关联一个double类型的分数(score)。redis通过分数来为集合中的成员进行从大到小的排序。<br/>有序集合的成员是唯一的，但分数(score)可以重复。
+
+| 命令 | 含义 |
+| :--- | :--- |
+|`ZADD key score member [[score member] [score member] ...]`|将一个或多个member元素及其score值加入到有序集key中。<br/>如果某个member已经是有序集的成员，则更新该member;并重新插入该元素，来保证member在**正确的位置**。<br/>score值可以是整数值或双精度浮点数。<br/>如果key不存在，则创建一个空的有序集并执行`ZADD`操作。<br/>当key存在但不是有序集的时候，返回一个错误。|
+|`ZCARD key`|返回有序集key的个数|
+|`ZSCORE key member`|返回有序集key中，成员member的score的值。<br/>如果member不在有序集中或key不存在，返回nil|
+|`ZCOUNT key min max`|返回有序集key中，score值在min和max之间(默认包括等于min或max的值)的成员数量。|
+|`ZINCRBY key increment member`|为有序集key的成员member的score值加上增量increment。<br/>当key不存在，或member不是key的成员时，该命令等同于`ZADD key increment member`<br/>当key不是有序集类型时，返回错误。|
+|`ZRANGE key start stop[WITHSCORES]`|**可以用来分页**，返回有序集key中，指定区间内的成员。<br/>成员的位置按score值递增来排序<br/>**具有相同的score值的成员按字典序(lexicographical order)来排列。|
+|`ZREVRANGE key start stop[WITHSCORE]`|**可以用来分页**，返回有序集key中，指定区间内的成员。<br/>其中成员的位置按score值递减来排列。<br/>具有相同score值的成员按照字典序的逆序(reverse lexicographical order)排列。|
+|`ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]`|返回有序集key中，所有score值介于min和max之间(包括等于min或max)的成员。<br/>有序集成员按score值递增排序。<br/>具有相同score值的成员按照字典序(lexicographical order)来排列。<br/>* 可选的`LIMIT`参数指定返回结果的数量及区间(*就像SQL中的`SELECT LIMIT offset,count`*),**当offset很大时，定位offset的操作可能需要遍历整个有序集，此过程最坏复杂度为`O(N)`时间。**<br/>* 可选的`WITHSCORES`参数决定时只返回有序集的成员还是将有序集成员和score值一起返回。<br/>* **该选项自Redis2.0版本可以用**|
+|`ZREVRANGEBYSCORE key max min [WITHSCORES] [LIMIT offset count]`|返回有序集key中，score值位于max和min之间(默认包括max或min)的所有成员。<br/>有序集成员按照score值递减排列。<br/>具有相同score值的成员按字典序的逆序(reverse lexicographical order )排列。|
+|`ZRANK key member`|返回有序集key中成员member的排名。<br/>**有序集成员按score值递增顺序排列**。<br/>排名以0为底，也就是说，score值最小的成员排名为0。|
+|`ZREVRANK key member`|返回有序集key中成员member的排名。<br/>**有序集成员按score值递减顺序排列**。<br/>排名以0为底，也就是说，score值最大的成员排名为0。|
+|`ZLEXCOUNT key min max`|计算有序集合中指定字典区间内成员数量。|
+|`ZREM key member [member ...]`|移除有序集key中的一个或多个成员，不存在的成员将被忽略。<br/>当key存在但不是一个有序集的时候，返回一个错误。|
+|`ZREMRANGEBYRANK key start stop`|移除有序集key中，指定排名(rank)区间内的所有成员。<br/>区间分别以下标参数start和stop指出，包含start和stop在内。<br/>下标参数start和stop都以0为底，也就是说，以0表示有序集第一个成员，1表示有序集第二个成员，以此类推。<br/>也可以用负数下标，以-1表示最后一个成员，-2表示倒数第二个成员，以此类推。|
+|`ZREMRANGEBYSCORE key min max`|移除有序集合中，所有score值介于min和max之间(包括等于min或max)的成员。<br/>在版本2.1.6开始，score值等于min或max也可以不包括在内。|
+|`ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM\|MIN\|MAX]`|计算给定的一个或多个有序集的**交集**，其中key的数量必须以`numkeys`参数指定，并将该交集的结果集存储到destination。<br/>默认情况下，结果集中某个成员的score值是所有给定集下该成员score值之和。|
+|`ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM\|MIN\|MAX]`|计算给定的一个或多个有序集的**并集**，其中给定key的数量必须以numkeys参数指定，并将该并集的结果存储到destination。<br/>默认情况下，结果集中某个成员的score值是所有给定集下该成员score值之和。<br/>* `WEIGHTS`<br/>使用`WEIGHTS`选项，你可以为每个给定有序集分别指定一个乘法因子(multiplication factor),每个给定有序集的所有score值在传递给聚合函数(aggregation function)之前都要先乘以该有序集的因子。<br/>如果没有指定`WEIGHTS`选项，乘法因子默认设置为**1**。<br/>* `AGGREGATE`<br/>使用`AGGREGATE`选项，你可以指定并集的结果集的聚合方式。<br/>默认使用参数`SUM`，可以将指定并集中某个成员的score值之和作为结果集中该成员的score值;<br/>使用参数`MIN`,可以将所有集合中某个成员的最小score值作为结果集中该成员的score值;<br/>使用参数`MAX`,可以将所有集合中某个成员的最大score值作为结果集中该成员的score值。|
+
+>小知识：+inf表示正无穷；-inf表示负无穷
