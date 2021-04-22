@@ -135,3 +135,12 @@
 |`ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM\|MIN\|MAX]`|计算给定的一个或多个有序集的**并集**，其中给定key的数量必须以numkeys参数指定，并将该并集的结果存储到destination。<br/>默认情况下，结果集中某个成员的score值是所有给定集下该成员score值之和。<br/>* `WEIGHTS`<br/>使用`WEIGHTS`选项，你可以为每个给定有序集分别指定一个乘法因子(multiplication factor),每个给定有序集的所有score值在传递给聚合函数(aggregation function)之前都要先乘以该有序集的因子。<br/>如果没有指定`WEIGHTS`选项，乘法因子默认设置为**1**。<br/>* `AGGREGATE`<br/>使用`AGGREGATE`选项，你可以指定并集的结果集的聚合方式。<br/>默认使用参数`SUM`，可以将指定并集中某个成员的score值之和作为结果集中该成员的score值;<br/>使用参数`MIN`,可以将所有集合中某个成员的最小score值作为结果集中该成员的score值;<br/>使用参数`MAX`,可以将所有集合中某个成员的最大score值作为结果集中该成员的score值。|
 
 >小知识：+inf表示正无穷；-inf表示负无穷
+
+#### 非默认情况下的min，max区间如何设置
+
+|命令|效果|
+|:---|:---|
+|`ZRANGEBYSCORE key min max`|`min<=score<=max`|
+|`ZRANGEBYSCORE key (min max`|`min<score<=max`|
+|`ZRANGEBYSCORE key min (max`|`min<=score<max`|
+|`ZRANGEBYSCORE key (min (max`|`min<score<max`|
