@@ -14,4 +14,7 @@
     * [Set](/redis/redis笔记.md#set集合类型)
     * [Hash](/redis/redis笔记.md#hash哈希类型)
     * [Zset](/redis/redis笔记.md#zset有序集合类型)
-
+3.  [特殊数据类型](/redis/redis笔记.md#特殊数据类型)
+    * [Geospatial](/redis/redis笔记.md#geospatial地理位置)
+    * [Hyperloglog](/redis/redis笔记.md#hyperloglog基数统计)
+    * [Bitmap](/redis/redis笔记.md#bitmap位图)
