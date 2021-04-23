@@ -144,3 +144,22 @@
 |`ZRANGEBYSCORE key (min max`|`min<score<=max`|
 |`ZRANGEBYSCORE key min (max`|`min<=score<max`|
 |`ZRANGEBYSCORE key (min (max`|`min<score<max`|
+
+## 特殊数据类型
+
+### Geospatial(地理位置)
+>底层使用的是Zset命令。
+
+| 命令 | 含义 |时间复杂度|
+| :--- | :--- | :---: |
+|`GEOADD key longitude latitude member [longitude latitude member ...]`|将指定的地理空间位置(纬度、经度、名称)添加到指定的key中。<br/>有效的经度从 **-180**度到**180**度。<br/>有效的维度从 **-85.05112878**度到**85.05112878**度。|O(log(N))|
+|`GEODIST key member1 member2[uniit]`|返回两个给定位置之间的距离。<br/>如果两个位置之间的其中一个不存在，则命令返回空值。<br/>指定单位参数unit为:<br/>* m 表示单位为米。<br/> * km 表示单位为千米。<br/> * mi 表示单位为英里。<br/> * ft表示单位为英尺。<br/>**默认使用米作为单位**|O(log(N))|
+|`GEOHASH key member [member ...]`|返回一个或多个位置元素的Geohash表示。<br/>该命令返回11个字符的Geohash字符串。|O(log(N))|
+|`GEOPOS key member [member ...]`|从key中返回所有给定位置的元素(经度和维度)|O(log(N))|
+|`GEORADIUS key longitude latitude radius m\|km\|ft\|mi [WITHCOORD][WITHDIST][WITHHASH][COUNT count]`|以给定的**经纬度**为中心，返回键包含的位置元素中，与中心距离不超过给定最大距离的所有位置元素。<br/>范围可以使用以下其中一个单位:<br/>* m 表示单位为米。<br/>* km表示单位为千米。<br/>* mi 表示单位为英里。<br/>* ft 表示单位为英尺。<br/>在给定以下选项时，命令会返回额外的信息:<br/>* `WITHDISI`:在返回位置元素的同时，将位置元素与中心之间的距离一并返回。单位与命令指定单位相同。<br/>* `WITHCOORD`:将位置元素的经度和纬度也一并返回。<br/>* `WITHHASH`:以52位有符号整数的形式，返回位置元素经过原始geohash编码的有序集合分值。<br/>默认返回未排序的位置元素，通过以下参数指定排序方式:<br/>* `ASC`:根据中心距离，按照从近到远的方式返回位置元素。<br/>* `DESC`:根据中心位置，按照从远到近的方式返回位置元素。<br/>使用`COUNT`选项获取前N个匹配元素。|O(N+log(M))|
+|`GEORADIUSBYMEMBER key longitude latitude radius m\|km\|ft\|mi [WITHCOORD][WITHDIST][WITHHASH][COUNT count]`|以给定的**位置元素**为中心，返回键包含的位置元素中，与中心距离不超过给定最大距离的所有位置元素。<br/>参考`GEORADIUS`命令。|O(N+log(M))|
+
+
+### Hyperloglog(基数统计)
+
+### Bitmap(位图)
