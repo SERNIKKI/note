@@ -238,7 +238,7 @@
 * 注释掉bind
 * 设置密码:`requirepass xxxx`
 4.  在pom文件中导入依赖
-```xml{.line-numbers}
+```xml
 <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
         <dependency>
             <groupId>redis.clients</groupId>
