@@ -222,3 +222,42 @@
 * 很悲观，认为什么时候都会出问题，无论做什么都会加锁。
 >乐观锁
 * 很乐观，认为什么时候都不会出问题，所以不会上锁。更新数据的时候会去判断一下，在此期间是否有人修改过这个数据。
+
+## Jedis
+>使用Jedis可以使用Java来操作redis数据库
+### 使用Jedis远程连接
+1.  修改服务器提供商的安全组，开启6379端口
+2.  修改服务器防火墙规则，开放6379端口
+```shell
+    systemctl start firewalld
+    systemctl status firewalld
+    firewalld-cmd --zone=public --add-port=6379/tcp --permanent
+```
+3.  修改redis配置文件
+* protected修改为no:`protected-mode no`
+* 注释掉bind
+* 设置密码:`requirepass xxxx`
+4.  在pom文件中导入依赖
+```xml
+<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+```
+5.  在Java中连接
+```java
+    public void test(){
+        //1、创建jedis对象，连接redis数据库
+        Jedis jedis = new Jedis("115.29.200.235",6379,false);
+        jedis.auth("sernikki000602");//设置密码
+        //2、使用redis中的命令操作数据库
+        System.out.println(jedis.ping());//测试ping命令是否连接成功
+        /*
+         * 在此操作redis数据库
+         */
+        //3、关闭连接
+        jedis.close();
+    }
+```
