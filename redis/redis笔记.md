@@ -161,5 +161,15 @@
 
 
 ### Hyperloglog(基数统计)
+>`hyperloglog`是用来做基数统计的算法，优点是在输入元素的数量或者体积非常大的时候，计算基数所需要的空间总是**固定的**，并且**非常小**。每个`hyperloglog`键只需要花费12kb内存，就可以计算接近2^64个不同元素的基数。
+
+>**`hyperloglog`只会根据输入元素来计算基数，而不会存储输入元素本身，所以不能返回输入的各个元素**。
+
+| 命令 | 含义 |
+| :--- | :--- |
+|`PFADD key element [element ...]`|添加指定元素到Hyperloglog中|
+|`PFCOUNT key [key ...]`|返回给定Hyperloglog的基数**估算值**。|
+|`PFMERGE destkey sourcekey [sourcekey ...]`|将多个Hyperloglog合并为一个Hyperloglog|
+
 
 ### Bitmap(位图)
