@@ -173,3 +173,19 @@
 
 
 ### Bitmap(位图)
+>`BitMap`即位图，是byte数组，用二进制表示，只有0和1两个数字。
+
+| 命令 | 含义 |
+| :--- | :--- |
+|`getbit key offset`|对key所存储的字符串值，获取指定的偏移量上的位|
+|`setbit key offset value`|对key所存储的字符串值，设置或清除指定偏移量上的位。<br/>返回值为该位在setbit之前的值。<br/>value只能取0或者1.<br/>offset从0开始，即使原位图只能10位，offset可以取1000。|
+|`bitcount key [start end]`|获取位图指定范围内位值为1的个数。**如果不指定start与end，则取所有**|
+|`bitop op destkey key [key ...]`|做多个BitMap的and(交集)、or(并集)、not(非集)、xor(异或)操作并将结果保存在destkey中。|
+|`bitpos key tartgetBit [start end]`|计算位图指定范围内第一个偏移量对应的值等于tartgetBit的位置。<br/>找不到则返回-1.<br/>start与end没有设置，则取全部。<br/>tartgetBit只能取0或者1。|
+
+#### 应用场景
+>统计每日用户登录数、打开天数等。如果独立用户很多，使用BitMap明显更有优势，能节省大量内存。但如果独立用户较少，则还是继续使用set存储，BitMap会产生多余的存储开销。
+
+* type = string，BitMap是string类型，最大512MB。
+* setbit时的偏移量，可能有较大耗时。
+* 位图不是绝对好。
