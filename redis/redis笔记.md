@@ -274,3 +274,74 @@
 * `Jedis`底层采用的是**直连**，在多个线程连接的情况下，是**不安全**的。想要避免直连，则需要使用`Jedis pool`连接池。**更像[BIO](https://www.cnblogs.com/zedosu/p/6666984.html)模式**
 * `Lettuce`使用`netty`，是异步请求，实例可以在多个线程中共享，**不存在线程不安全的情况**。可以减少线程数据。**更像[NIO](https://www.cnblogs.com/zedosu/p/6666984.html)模式**
 
+#### 在SpringBoot中连接
+
+```java
+    //获取connection连接
+    RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
+    //清空数据库
+    connection.flushDb();
+    //操作数据库
+    redisTemplate.opsForValue().set("v1",s);
+    System.out.println(redisTemplate.opsForValue().get("v1"));
+    //关闭连接
+    connection.close();
+```
+
+#### 序列化
+>在Springboot中，默认的序列化是`JdkSerializationRedisSerializer`，**故会产生乱码的情况**。
+```java
+    //源码中关于序列化的设置
+    static RedisSerializer<Object> java(@Nullable ClassLoader classLoader) {
+		return new JdkSerializationRedisSerializer(classLoader);
+	}
+```
+**向数据库中传入对象**
+* 使用`new ObjectMapper().writeValueAsString()`方法将对象转为json字符串
+```java
+    Pet pet = new Pet("番茄", "2");
+    //将pet对象转为json格式的字符串
+    String jsonPet = new ObjectMapper().writeValueAsString(pet);
+    redisTemplate.opsForValue().set("pet",jsonPet);
+```
+* 直接传入对象，将会报**对象没有序列化**的错误。需要对象实现**序列化**才能传值成功。
+```java
+    public class Pet implements Serializable {
+        private String name;
+        private String age;
+    }
+```
+
+**自定义redisTemplate**
+```java
+    @Configuration
+    public class RedisConfig {
+        @Bean
+        @SuppressWarnings("all")
+        public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
+            RedisTemplate<String, Object> template = new RedisTemplate<>();
+            template.setConnectionFactory(redisConnectionFactory);
+            //序列化配置
+            Jackson2JsonRedisSerializer serializer = new Jackson2JsonRedisSerializer(Object.class);
+            //使用ObjectMapper进行转义
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+            mapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
+            serializer.setObjectMapper(mapper);
+            StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+            //key采用string的序列化方式
+            template.setKeySerializer(stringRedisSerializer);
+            //hash采用string的序列化方式
+            template.setHashKeySerializer(stringRedisSerializer);
+            //value采用jackson
+            template.setValueSerializer(serializer);
+            template.setHashValueSerializer(serializer);
+            template.afterPropertiesSet();
+            return template;
+        }
+    }
+```
+
+#### Redis工具类
+
+参考[RedisUtils](/redis/redisUtils.md)
