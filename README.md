@@ -19,4 +19,4 @@
     * [Hyperloglog](/redis/redis笔记.md#hyperloglog基数统计)
     * [Bitmap](/redis/redis笔记.md#bitmap位图)
 4.  [事务](/redis/redis笔记.md#事务)
-5.  [Jedis](/redis/redis笔记.md#jedis)
+5.  [Java操作Redis](/redis/redis笔记.md#java操作Redis)
