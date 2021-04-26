@@ -223,9 +223,13 @@
 >乐观锁
 * 很乐观，认为什么时候都不会出问题，所以不会上锁。更新数据的时候会去判断一下，在此期间是否有人修改过这个数据。
 
-## Jedis
+## Java操作Redis
+
+### Jedis
 >使用Jedis可以使用Java来操作redis数据库
-### 使用Jedis远程连接
+
+#### 使用Jedis远程连接
+
 1.  修改服务器提供商的安全组，开启6379端口
 2.  修改服务器防火墙规则，开放6379端口
 ```shell
@@ -261,3 +265,12 @@
         jedis.close();
     }
 ```
+
+### SpringBoot整合Redis
+>在SpringBoot2.x版本之后，底层不再使用`Jedis`而改用`lettuce`。
+
+#### Jedis和Lettuce的区别
+
+* `Jedis`底层采用的是**直连**，在多个线程连接的情况下，是**不安全**的。想要避免直连，则需要使用`Jedis pool`连接池。**更像[BIO](https://www.cnblogs.com/zedosu/p/6666984.html)模式**
+* `Lettuce`使用`netty`，是异步请求，实例可以在多个线程中共享，**不存在线程不安全的情况**。可以减少线程数据。**更像[NIO](https://www.cnblogs.com/zedosu/p/6666984.html)模式**
+
