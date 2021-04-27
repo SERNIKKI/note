@@ -344,4 +344,14 @@
 
 #### Redis工具类
 
-参考[RedisUtils](/redis/redisUtils.md)
+参考[RedisUtils](/redis/redisUtils.md·)
+
+## Redis.conf
+>redis的配置文件
+* redis配置文件对大小写**不敏感**
+* redis可以包含其他conf
+```bash
+# include /path/to/local.conf
+# include /path/to/other.conf
+```
+* 
