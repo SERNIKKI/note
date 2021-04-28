@@ -20,7 +20,7 @@
     * [Bitmap](/redis/redis笔记.md#bitmap位图)
 4.  [事务](/redis/redis笔记.md#事务)
 5.  [Java操作Redis](/redis/redis笔记.md#java操作Redis)
-6.  [Redis.conf文件](/redis/redis笔记.md#redis.conf)
+6.  [Redis.conf文件](/redis/redis笔记.md#redisconf)
 7.  [Redis持久化](/redis/redis笔记.md#redis持久化)
 8.  [Redis订阅](/redis/redis笔记.md#redis订阅)
 9.  [Redis集群环境搭建](/redis/redis笔记.md#redis集群环境搭建)
