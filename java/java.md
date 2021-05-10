@@ -298,3 +298,18 @@ JDK自带有三个类加载器`bootstrap ClassLoader、ExtClassLoader、AppClass
     * 主要是为了**安全性**，避免用户自己编写的类动态语言替换Java的一些核心类，比如String。
     * 同时也避免了**类的重复加载**，因为JVM中区分不同类，不仅仅是根据类名，相同的class文件被不同的ClassLoader加载就是**不同**的两个类。
 
+### 17、Java中的异常体系
+
+![Java异常体系](https://cdn.jsdelivr.net/gh/sernikki/MyMp3/java/throwable.png)
+Java中的所有异常都来自**顶级父类Throwable**。
+Throwable下有两个子类Exception和Error。
+Error是程序无法处理的错误，一旦出现这个错误，则程序被迫停止运行。
+Exception不会导致程序停止，又分为两个部分RunTimeException(运行时异常)和CheckedException(检查异常)。
+RunTimeException常常发生在程序运行过程中，会导致当前线程执行失败。CheckedException常常发生在程序编译过程中，会导致程序编译不通过。
+>所有的这些异常又分为受查异常和非受查异常
+
+* 非受查异常:Error、RunTimeException及其子类属于非受查异常，不强制用户进行异常处理
+* 受查异常:除了非受查异常之外的都是受查异常，会强制用户进行异常处理
+
+
+
