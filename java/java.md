@@ -382,3 +382,88 @@ public static void main(String[] args) throws InterruptedException {
         System.out.println("main");
     }
 ```
+
+### 21、对线程安全的理解
+
+**不是线程安全，应该是内存安全，堆是共享内存，可以被所有线程访问**
+>当多个线程访问一个对象时，如果不用进行额外的同步控制或其他的协调操作。调用这个对象的行为都可以获得正确的结果，我们就说这个对象是线程安全的
+**堆**是进程和线程**共有的空间**，分**全局堆**和**局部堆**，全局堆就是所有没有分配的空间，局部堆就是用户分配的空间。堆在操作系统对进程初始化的时候分配，运行过程中也可以向系统申请额外的堆，但是用完了要还给操作系统，要不然就是**内存泄漏**
+>在Java中，堆是Java虚拟机所管理的内存中最大的一块，是所有线程共享的一块区域，在虚拟机启动时创建。堆所存在的内存区域的唯一目的就是存放对象实例，几乎所有的对象实例以及数组都在这里分配内存
+**栈**是每个线程独有的，保存其运行状态和局部自动变量的。栈在线程开始的时候初始化，每个线程的栈**互相独立**，因此，栈是**线程安全**的。操作系统在切换线程的时候会**自动切换栈**。栈空间不需要在高级语言里面显式的分配和释放。
+
+目前主流操作系统都是多任务的，即多个进程同时运行。为了保证安全，每个进程只能访问分配给自己的内存空间，而不能访问别的进程的，这是由操作系统保障的。
+在每个进程的内存空间中都会有一块特殊的公共区域，通常称为堆(内存)。进程内的所有线程都可以访问到该区域，这就是造成问题的潜在原因。
+
+### 22、Thread和Runnable的区别
+
+>Thread是一个类而Runnable是一个接口
+Thread和Runnable的实质是继承关系，没有可比性。无论使用Runnable还是Thread，都会new Thread，然后执行run方法。用法上，如果有**复杂的线程操作需求**，那就选择继承**Thread**，如果**只是执行一个任务**，那就实现**Runnable**
+
+### 23、对守护线程的理解
+
+守护线程:为所有非守护线程提供服务的线程；任何一个守护线程都是整个JVM中所有非守护线程的保姆
+守护线程类似于整个进程的一个默默无闻的小喽喽；它的生死无关紧要，它却依赖整个进程而运行；那天其他线程结束了，没有要执行的，程序就自己结束，不会去理守护线程，直接把它中断。
+**由于守护线程的终止是自身无法控制的，因此千万不要把IO、File等重要操作逻辑分配给它；因为它不靠谱**
+
+#### 守护线程的作用是什么
+
+比如:GC垃圾回收线程就是一个经典的守护线程，当我们的程序中不再有任何运行的Thread，程序就不会再产生垃圾，垃圾回收器也就无事可做，所以当垃圾回收线程是JVM仅剩的线程时，垃圾回收线程就会自动离开。它始终在低级别的状态下运行，用于监控和管理系统中的可回收资源。
+
+* **应用场景**
+    1.  为其他线程提供服务支持的情况
+    2.  或者在任何情况下，程序结束时，这个线程必须正常且立刻关闭，就可以用来做守护线程使用。反之，如果一个正在执行某个操作的线程必须要正确地关闭掉，否则就会出现不好的结果，那么这个线程就不能是守护线程，而是**用户线程**。通常都是关键的事务，比方说，数据库录入或者更新，这些操作都是不能中断的
+
+`thread.setDaemon(true)`必须在`thread.start()`之前设置，否则会抛出一个`illegalThreadStateException`异常。**不能把正在运行的常规线程设置为守护线程**。
+
+在`Daemon`线程中产生的新线程也是守护线程
+
+### 24、ThreadLocal的原理和使用场景
+
+每一个Thread对象均含有一个**ThreadLocalMap**类型的成员变量`threadLocals`，它存储本线程中所有**ThreadLocalMap**对象及其对应的值
+**ThreadLocalMap由一个个的Entry对象构成**
+**Entry**继承自**weakReference<ThreadLocal<?>>**,一个Entry由ThreadLocal对象和object构成。由此可见，Entry的key是ThreadLocal对象，并且是一个**弱引用**。当没有指向key的强引用后，该key就会被垃圾回收器回收。
+
+#### get与set方法
+
+当执行`set`方法时，ThreadLocal首先会获取当前线程对象，然后获取当前线程的ThreadLocalMap对象。再以当前ThreadLocal对象为key，将值存储进ThreadLocalMap对象中。
+`get`方法执行过程类似。ThreadLocal首先会获取当前线程对象，然后获取当前线程的ThreadLocalMap对象。再以当前的ThreadLocal对象为key，获取对应的value。
+由于每一条线程均含有各自**私有的**ThreadLocalMap容器，这些容器相互独立且互不影响，因此不会存在线程安全性问题，从而也无需使用同步机制来保证多条线程访问容器的互斥性。
+
+#### 适用场景
+
+1.  在进行对象跨层传递的时候，使用ThreadLocal可以避免多次传递，打破层次间的约束。
+2.  线程间的数据隔离。
+3.  进行事务操作，用于存储线程事务信息。
+4.  数据库连接，Session会话管理。
+
+>**Spring**框架在事务开始时会给当前线程绑定一个**Jdbc Connection**，在整个事务过程都是使用该线程绑定的**connection**来执行数据库操作，实现了事务的**隔离性***，**Spring**框架里面就是使用**ThreadLocal**来实现这种隔离。
+
+### 25、ThreadLocal内存泄露的原因，如何避免
+
+####  内存泄漏
+内存泄漏是指程序在申请内存后，无法释放已经申请的内存空间，一次内存泄漏危害可以忽略，但是内存泄漏堆积后果很严重，无论多少内存，最后都会被用完，最终会导致**OOM**。
+**不再会被使用的对象或者是变量占用的内存不能被回收，就是内存泄漏**
+
+* 强引用
+使用最普遍的引用(new)，这个对象就具有强引用(通过反射创建的的对象也是强引用)，不会被垃圾回收器回收。当内存空间不足，Java虚拟机宁愿抛出`OutOfMemoryError`错误，使程序异常终止，也不会回收这种对象。
+```
+如果想取消强引用和某个对象之间的关联，可以显式地将引用赋值为null，这样可以使JVM在合适的时间就会回收该对象
+```
+* 弱引用
+JVM进行垃圾回收时，无论内存是否充足，都会回收被弱引用关联的对象。在Java中，用`java.lang.ref.WeakReference`类来表示。**可以在缓存中使用弱引用**
+
+ThreadLocal的实现原理,每一个Thread维护一个ThreadLocalMap，key为使用**弱引用**的ThreadLocal实例，value为线程变量的副本
+![TreadLocal](https://cdn.jsdelivr.net/gh/sernikki/MyMp3/java/threadLocal.png)
+ThreadLocalMap使用ThreadLocal的弱引用作为key，如果一个ThreadLocal不存在外部**弱引用**时，key(ThreadLocal)势必会被GC回收，这样就导致ThreadLocalMap中key为null，而value还存在着强引用，只有thread线程**退出**后，value的强引用链条才会断掉，但如果当前线程迟迟不结束的话，这些key为null的Entry的value就会一直存在着**强引用**
+    * key使用强引用
+    当ThreadLocalMap的key为强引用，回收ThreadLocal时，因为ThreadLocalMap还持有ThreadLocal的强引用，如果没有手动删除，ThreadLocal不会被回收，导致Entry**内存泄漏**
+    * key使用弱引用
+    当ThreadLocalMap为弱引用，回收ThreadLocal时，由于ThreadLocalMap持有ThreadLocal的弱引用，即使没有手动删除，ThreadLocal也会被回收。当key为null，在下一次ThreadLocalMap调用`set()、get()、remove()`方法的时候会被清除value值。
+
+因此，ThreadLocal内存泄露的根源是:由于ThreadLocalMap的生命周期和Thread一样长，如果没有手动删除对应key就会导致内存泄漏，而不是因为弱引用。
+
+#### ThreadLocal正确使用方法
+
+* 每次使用完ThreadLocal都调用它的`remove()`方法清除数据
+* 将ThreadLocal变量定义为`private static`，这样就一直存在ThreadLocal的强引用，也就能保证任何时候都能通过ThreadLocal的弱引用访问到Entry的value值，进而清除掉
+
