@@ -657,3 +657,59 @@ AOP：将程序中的交叉业务逻辑(比如安全，日志，事务等)，封
 #### 依赖注入
 
 "获得依赖对象的过程被反转了"。控制被反转之后，获得依赖对象的过程由自身管理变为了由IOC容器自动注入。依赖注入是实现IOC的方法，就是由IOC容器在运行期间，动态的将某种依赖关系注入到对象中。
+
+### 35、BeanFactory和ApplicationContext有什么区别
+
+ApplicationContext是BeanFactory的**子接口**
+
+ApplicationContext提供了**更完整的功能**
+    1.  继承`MessageSource`支持国际化
+    2.  统一的资源文件访问方式
+    3.  提供在监听器中注册bean的事件
+    4.  同时加载多个配置文件
+    5.  载入多个(有继承关系)上下文，使得每一个上下文都专注一一个特定的层次，比如应用的web层
+
+* BeanFactory采用的是延迟加载形式来注入bean的，即只有在使用某个Bean时(调用getBean()),才对该Bean进行加载实例化。这样，我们就不能发现一些存在的Spring的配置问题。如果Bean的某一个属性没有注入，BeanFactory加载后，直至第一次使用调用getBean方法才会抛出异常。
+* ApplicatiionContext是在容器启动时，一次性的创建了所有的Bean。这样，在容器启动时，我们就可以发现Spring中存在配置错误，这样有利于检查所依赖属性是否注入。ApplicationContext启动后预载进入所有的单实例Bean，通过预载入单实例bean，确保当你需要的时候，你就不用等待，因为它们已经创建好了。
+* 相对于基本的BeanFactory，ApplicationContext唯一的不足是占用内存空间。当应用程序配置的Bean较多的时候，程序启动较慢。 
+* BeanFactory通常以编程的方式被创建，ApplicationContext还能以声明的方式被创建，如使用ContextLoader
+* BeanFactory和ApplicationContext都支持BeanPostProcessor、BeanFactoryPostProcessor的使用，但两者的区别是：BeanFactory需要手动注册，而ApplicationContext则是自动注册
+
+### 36、SpringBean的生命周期
+
+1.  解析类得到`BeanDefinition`
+2.  如果有多个构造方法，则要推断构造方法
+3.  确定好构造方法之后，进行实例化得到一个对象
+4.  对对象中加了`@Autowired`注解的属性进行属性填充
+5.  回调`Aware`方法，比如`BeanNameAware`，`BeanFactoryAware`
+6.  调用`BeanPostProcessor`的初始化前的方法
+7.  调用初始化方法
+8.  调用`BeanPostProcessor`的初始化后的方法，在这里进行**AOP**
+9.  如果当前创建的Bean是单例的则会把Bean放入**单例池**
+10.  使用bean
+11.  Spring容器关闭的时候调用`DisposableBean`中的`destory()`方法
+
+### 37、Spring支持的几种bean的作用域
+
+* `singleton`：默认，每个容器中只有一个bean的实例，单例的模式由`BeanFactory`自身来维护。该对象的生命周期与Spring IOC容器一致(但在第一次被注入的时候在会被创建)
+* `prototype`：为每一个bean请求提供一个实例。在每次注入的时候都会创建一个新对象
+* `request`：bean被定义为在每个HTTP请求中创建一个单例对象，也就是说在单个请求中都会复用这个单例对象
+* `session`：与`request`范围类似，确保每个`session`中有一个bean的实例，在`session`过期后，bean会随之失效。
+* `application`：bean被定义为在`ServletContext`的生命周期中复用一个单例对象
+* `websocket`：bean被定义为在`websocket`的生命周期中复用一个单例对象
+* `global-session`：全局作用域，`global-session`和`Portiet`应用相关。当你的与应用部署在`Portiet`容器中工作时，它包含很多`portiet`。如果你想要声明所有的`portiet`共用全局的存储变量的话，那么这全局变量需要存储在`global-session`中。全局作用域与Servlet中的session作用域效果相同
+
+### 38、Spring框架中的单例Bean是线程安全的吗‘
+
+Spring中的Bean默认是**单实例**的，框架**并没有**对bean进行多线程的封装处理
+
+如果Bean是有状态的，那就需要开发人员自己来进行线程安全的保证，最简单的办法就是改变bean的作用域，把`singleton`改为`prototype`这样每次请求Bean就相当于是new Bean()，就可以保证线程的安全了。
+    * 有状态指**有数据存储功能**
+    * 无状态是指**不会保存数据** controller、service和dao层本身并不是线程安全的，只是如果只调用里面的方法，而且多线程调用一个实例的方法，会在内存中复制变量，这是自己线程的工作内存，是安全的
+
+Dao会操作数据库Connection、Connection是带有状态的，比如说数据库事务，Spring的事务管理器使用ThreadLocal为不同线程维护了一套独立的connection副本，保证各个线程之间不会相互影响
+
+不要在bean中声明任何带有状态的实例变量或者类变量，如果必须这样做，那么就只能使用ThreadLocal把变量变为线程私有的，如果bean的实例变量或类变量需要在多个线程之间共享，那么就只能能用`synchronized`、`lock`、`CAS`等这些来实现线程同步的方法了
+
+### 39、Spring框架中都用到了那些设计模式
+
