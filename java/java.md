@@ -767,3 +767,67 @@ Dao会操作数据库Connection、Connection是带有状态的，比如说数据
 >数据库的配置隔离级别是`Read Committed`，而**Spring**配置的隔离级别是`Repeatable Read`，请问这时隔离级别以哪一个为准？
 >以**Spring**配置为准，如果**Spring**设置的隔离级别数据库不支持，效果取决于数据库
 
+### 41、spring事务传播机制
+
+多个事务方法互相调用时，事务如何在这些方法间传播
+>方法A是一个的方法，方法A执行的过程中调用了方法B，那么方法B有无事务以及方法B对事务的要求不同都会对方法A的事务具体执行造成影响，同时方法A的事务对方法B的事务执行也有影响，这种影响具体是什么就由两个方法所定义的**事务传播类型**决定
+
+#### 事务传播类型
+
+* `REQUIRED`(Spring默认的事务传播类型)：如果当前没有事务，则自己新建一个事务；如果当前存在事务，则加入这个事务
+* `SUPPORTS`：当前存在事务，则加入当前事务；如果当前没有事务，则以非事务方法执行
+* `MANDATORY`：当前存在事务，则加入当前事务；如果当前不存在事务，则抛出异常
+* `REQUIRES_NEW`：创建一个新事物，如果存在当前事务，则挂起该事务。
+* `NOT_SIPPORTED`：以非事务方法执行，如果当前存在事务，则挂起当前事务
+* `NEVER`：不使用事务，如果当前事务存在，则抛出异常
+* `NESTED`：如果当前事务存在，则在嵌套事务中执行；否则与`REQUIRED`的操作一样(开启一个事务)
+    1.  和`REQUIRES_NEW`的区别
+    >`REQUIRES_NEW`是新建一个事务并且新开启的这个事务与原有事务**无关**，而`NESTED`则是当前存在事务时(我们把当前事务称之为父事务)会开启一个嵌套事务(称之为**子事务**)。在`NESTED`情况下父事务回滚时，子事务也会回滚，而在`REQUIRES_NEW`情况下，原有业务回滚，不会影响新开启的事务。
+    2.  和`REQUIRED`的区别
+    >`REQUIRED`情况下，调用方法存在事务时，则被调用方和调用方使用同一个事务，由于共用一个事务，那么被调用方出现异常时，无论调用方是否**catch**其异常，事务都会回滚，而在`NESTED`情况下，被调用方发生异常时，调用方可以**catch**其异常，这样只有子业务回滚，父业务不受影响。
+
+### 42、spring事务什么时候会失效
+
+spring事务的原理是AOP，进行了切面增强，那么失效的根本原因是这个AOP不起作用了，常见情况有如下几种
+1.  发生自调用，类里面使用this调用本类的方法(this通常省略)，此时这个this对象不是代理类，而是UserService本身。解决方法是让那个this变成UserService的代理类
+2.  方法不是public的，如果必须要用在public上，则可以开启`AspectJ`代理模式
+3.  数据库不支持事务
+4.  没有被spring管理
+5.  异常被吃掉，事务不会回滚(或者抛出的异常没有被定义，默认为RuntimeException)
+
+### 43、什么是bean的自动装配，有那些方式？
+
+开启自动装配，只需要在xml配置文件`<bean>`中定义"autowire"属性或者添加`@Autowire`注解
+
+autowire有五种装配方式
+* no-缺省情况下，自动装配是通过ref属性手动设置的
+```
+手动装配：以value或ref的方式明确指定属性值都是手动装配
+需要通过"ref"属性来连接bean
+```
+
+* byName-根据bean的**属性名称**进行自动装配
+```xml
+Cutomer的属性名称为Person，Spring会将bean id为person的bean通过setter方法进行自动装配
+<bean id="cutomer" class="com.xxx.xxx.Cutomer" autowire="byName"/>
+<bean id="person" class="com.xxx.xxx.Person"/>
+```
+
+* byType-根据bean的类型进行自动装配
+```xml
+Cutomer的属性名称为Person，Spring会将person类型的bean通过setter方法进行自动装配
+<bean id="cutomer" class="com.xxx.xxx.Cutomer" autowire="byType"/>
+<bean id="person" class="com.xxx.xxx.Person"/>
+```
+
+* constructor-类似byType，不过是应用于构造器的参数。如果一个bean与构造器参数的类型相同，则进行自动装配，否则导致异常。
+
+```xml
+Cutomer构造函数的参数person的类型为为Person，Spring会将Person类型通过构造方法进行自动装配
+<bean id="cutomer" class="com.xxx.xxx.Cutomer" autowire="constructor"/>
+<bean id="person" class="com.xxx.xxx.Person"/>
+```
+
+* autodetect-如果有默认的构造器，则通过constructor方式进行自动装配，否则使用byType进行自动装配
+
+`@Autowire`自动装配bean可以在字段、setter方法、构造函数上使用
