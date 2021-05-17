@@ -831,3 +831,5 @@ Cutomer构造函数的参数person的类型为为Person，Spring会将Person类�
 * autodetect-如果有默认的构造器，则通过constructor方式进行自动装配，否则使用byType进行自动装配
 
 `@Autowire`自动装配bean可以在字段、setter方法、构造函数上使用
+
+###
